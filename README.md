@@ -2,6 +2,15 @@
 
 A Quasar Project
 
+## Layout
+### Desktop:
+<img src="src/img/desktop.gif">
+
+<hr>
+
+### Mobile:
+<img alt="Demo" src="src/img/mobile.gif">
+
 ## Install the dependencies
 ```bash
 yarn

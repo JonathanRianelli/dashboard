@@ -3,99 +3,142 @@
     class="flex flex-center"
     type="bar"
     height="100%"
-    :options="chartOptions"
+    :options="options"
     :series="series"
   ></apexchart>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
+import { api } from "boot/axios";
 
 export default defineComponent({
   name: "App",
   setup() {
-    return {
-      series: [
-        {
-          name: "Sales",
-          data: [2.3, 3.1, 4.0, 10.1, 4.0, 3.6],
-        },
-      ],
+    let series = ref([
+      {
+        name: "Sales",
+        data: [],
+      },
+    ]);
 
-      chartOptions: {
-        chart: {
-          height: 350,
-          type: "bar",
-        },
-        plotOptions: {
-          bar: {
-            borderRadius: 5,
-            dataLabels: {
-              position: "top", // top, center, bottom
-            },
-          },
-        },
-        dataLabels: {
-          enabled: true,
-          formatter: function (val) {
-            return val + "k";
-          },
-          offsetY: -20,
-          style: {
-            fontSize: "12px",
-            colors: ["#304758"],
-          },
-        },
-
-        xaxis: {
-          categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-          position: "bottom",
-          axisBorder: {
-            show: true,
-          },
-          axisTicks: {
-            show: false,
-          },
-          crosshairs: {
-            fill: {
-              type: "gradient",
-              gradient: {
-                colorFrom: "#D8E3F0",
-                colorTo: "#BED1E6",
-                stops: [0, 100],
-                opacityFrom: 0.4,
-                opacityTo: 0.5,
-              },
-            },
-          },
-          tooltip: {
-            enabled: true,
-          },
-        },
-        yaxis: {
-          axisBorder: {
-            show: false,
-          },
-          axisTicks: {
-            show: false,
-          },
-          labels: {
-            show: false,
-            formatter: function (val) {
-              return val + "k";
-            },
-          },
-        },
-        title: {
-          text: "Semester sales",
-          floating: false,
-          offsetY: 1,
-          align: "center",
-          style: {
-            color: "#444",
+    let options = ref({
+      chart: {
+        height: 350,
+        type: "bar",
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 5,
+          dataLabels: {
+            position: "top", // top, center, bottom
           },
         },
       },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val) {
+          return val + "$";
+        },
+        offsetY: -20,
+        style: {
+          fontSize: "12px",
+          colors: ["#304758"],
+        },
+      },
+
+      xaxis: {
+        categories: [],
+        position: "top",
+        axisBorder: {
+          show: true,
+        },
+        axisTicks: {
+          show: false,
+        },
+        crosshairs: {
+          fill: {
+            type: "gradient",
+            gradient: {
+              colorFrom: "#D8E3F0",
+              colorTo: "#BED1E6",
+              stops: [0, 100],
+              opacityFrom: 0.4,
+              opacityTo: 0.5,
+            },
+          },
+        },
+        tooltip: {
+          enabled: true,
+        },
+        labels: {
+          style: {
+            fontSize: "10px",
+            align: "center",
+          },
+        },
+      },
+      yaxis: {
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+        labels: {
+          show: false,
+          formatter: function (val) {
+            return val + "$";
+          },
+        },
+      },
+      title: {
+        text: "Average Prices",
+        floating: false,
+        offsetY: 1,
+        align: "left",
+        style: {
+          color: "#444",
+        },
+      },
+      noData: {
+        text: "Loading...",
+      },
+    });
+
+    const productsPrice = () => {
+      api
+        .get("https://dummyjson.com/products/")
+        .then((res) => {
+          const products = res.data.products;
+
+          const price = products.slice(0, 6).map((item) => item.price);
+          const name = products.slice(0, 6).map((item) => item.title);
+
+          series.value = [
+            {
+              data: price,
+            },
+          ];
+
+          options.value = {
+            xaxis: {
+              categories: name,
+            },
+          };
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
+
+    onMounted(() => {
+      productsPrice();
+    });
+
+    return {
+      series,
+      options,
     };
   },
 });
